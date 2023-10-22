@@ -1,4 +1,4 @@
-# Chatting web-app assignment | I'mbesideyou | Aryaman Sharma
+# Chatting web-app assignment | I'mbesideyou | Aryaman Sharma | IIT Bombay | BS maths
 
 This repository is a submission for the internship assignment - MERN stack based chatting web-app with features such as JWT authentication, Group chat, real time messages and a user-friendly interface.
 

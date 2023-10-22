@@ -3,20 +3,21 @@ import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
 import { VStack } from "@chakra-ui/layout";
 import { useState } from "react";
-import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
+import { ChatState } from "../../Context/ChatProvider";
 
 const Login = () => {
   const [show, setShow] = useState(false);
+  const handleClick = () => setShow(!show);
+  const toast = useToast();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState(false);
 
-  const toast = useToast();
-  const navigate = useNavigate();
-
-  const handleClick = () => setShow(!show);
+  const history = useHistory();
+  const { setUser } = ChatState();
 
   const submitHandler = async () => {
     setLoading(true);
@@ -32,10 +33,11 @@ const Login = () => {
       return;
     }
 
-    // console.log(email, password);
     try {
       const config = {
-        headers: { "Content-type": "application/json" },
+        headers: {
+          "Content-type": "application/json",
+        },
       };
 
       const { data } = await axios.post(
@@ -44,7 +46,6 @@ const Login = () => {
         config
       );
 
-      // console.log(JSON.stringify(data));
       toast({
         title: "Login Successful",
         status: "success",
@@ -52,10 +53,10 @@ const Login = () => {
         isClosable: true,
         position: "bottom",
       });
-
-      localStorage.setItem("userInformation", JSON.stringify(data));
+      setUser(data);
+      localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
-      navigate("/chats");
+      history.push("/chats");
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -90,20 +91,14 @@ const Login = () => {
             placeholder="Enter password"
           />
           <InputRightElement width="4.5rem">
-            <Button
-              colorScheme="cyan"
-              h="1.75rem"
-              size="sm"
-              onClick={handleClick}
-            >
+            <Button h="1.75rem" size="sm" onClick={handleClick}>
               {show ? "Hide" : "Show"}
             </Button>
           </InputRightElement>
         </InputGroup>
       </FormControl>
       <Button
-        fontWeight="bold"
-        colorScheme="teal"
+        colorScheme="blue"
         width="100%"
         style={{ marginTop: 15 }}
         onClick={submitHandler}
@@ -112,37 +107,15 @@ const Login = () => {
         Login
       </Button>
       <Button
-        fontWeight="bold"
         variant="solid"
-        colorScheme="yellow"
+        colorScheme="red"
         width="100%"
         onClick={() => {
-          setEmail("guest@test.com");
-          setPassword("guesttest");
+          setEmail("guest@example.com");
+          setPassword("123456");
         }}
       >
-        Guest User Login
-      </Button>
-
-      <Button
-        //fontWeight="bold"
-        variant="solid"
-        colorScheme="cyan"
-        width="100%"
-        onClick={() => {
-          //console.log("video");
-          //navigate("/https://dev.to/siddharthssb11")
-        }}
-      >
-        <a
-          href="https://www.loom.com/share/339d7abfe1924bbd8cb53c0cc3fac551"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Demo-Video"
-          width="100%"
-        >
-          <strong>Demo&nbsp;📽️&nbsp;Video</strong>, Recommended <strong><u>2x SPEED</u></strong>&nbsp;&#10132;
-        </a>
+        Get Guest User Credentials
       </Button>
     </VStack>
   );

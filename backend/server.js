@@ -1,26 +1,28 @@
-const path = require("path");
 const express = require("express");
-const dotenv = require("dotenv");
 const connectDB = require("./config/db");
-const colors = require("colors");
+const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
-
+const path = require("path");
 
 dotenv.config();
-connectDB(); //mongodb connection
+connectDB();
 const app = express();
 
-app.use(express.json()); // to accept json data from req body sent from fe 
+app.use(express.json()); // to accept json data
+
+// app.get("/", (req, res) => {
+//   res.send("API Running!");
+// });
 
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
 
+// --------------------------deployment------------------------------
 
-//deployment
 const __dirname1 = path.resolve();
 
 if (process.env.NODE_ENV === "production") {
@@ -35,44 +37,38 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-/* NODE_ENV=production *///add it in env
+// --------------------------deployment------------------------------
 
 // Error Handling middlewares
 app.use(notFound);
 app.use(errorHandler);
- 
-/* app.get('/', (req, res) => {
-    //console.log('hello from server');
-    res.send('Api running');
-}) */
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, console.log(`Server started on port ${PORT}`.yellow.bold));
+const PORT = process.env.PORT;
 
+const server = app.listen(
+  PORT,
+  console.log(`Server running on PORT ${PORT}...`.yellow.bold)
+);
 
 const io = require("socket.io")(server, {
-  pingTimeout: 120000,
+  pingTimeout: 60000,
   cors: {
-    //origin: "http://localhost:3000", //development
-    origin: "https://textalot.herokuapp.com", //deployment
-    credentials: true,
+    origin: "http://localhost:3000",
+    // credentials: true,
   },
 });
 
 io.on("connection", (socket) => {
   console.log("Connected to socket.io");
-
   socket.on("setup", (userData) => {
     socket.join(userData._id);
-    console.log(`Logged in user ${userData.name} joined the created room`);
     socket.emit("connected");
   });
 
   socket.on("join chat", (room) => {
     socket.join(room);
-    console.log("User Joined the selectedChat Room: " + room);//room-selectedChatId
+    console.log("User Joined Room: " + room);
   });
-  
   socket.on("typing", (room) => socket.in(room).emit("typing"));
   socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
@@ -85,8 +81,6 @@ io.on("connection", (socket) => {
       if (user._id == newMessageRecieved.sender._id) return;
 
       socket.in(user._id).emit("message recieved", newMessageRecieved);
-      //.in-- inside user._id exclusive socket room joined-- emit this "message recieved" event ////mern-docs
-
     });
   });
 
@@ -94,19 +88,4 @@ io.on("connection", (socket) => {
     console.log("USER DISCONNECTED");
     socket.leave(userData._id);
   });
-
-});  
-
-////////////////////////////////////////////////////////////////
-////////////////////////////////
-//call join to subscribe the socket to a given channel/room
-
-/* io.on("connection", (socket) => {
-  socket.join("some room");
-}); */
-
-//broadcast to a room from a given socket --  every socket in the room excluding the sender will get the event.
-
-/* io.on("connection", (socket) => {
-  socket.to("some room").emit("some event");
-}); */
+});

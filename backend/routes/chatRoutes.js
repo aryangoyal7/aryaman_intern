@@ -5,7 +5,7 @@ const {
   createGroupChat,
   removeFromGroup,
   addToGroup,
-  renameGroup
+  renameGroup,
 } = require("../controllers/chatControllers");
 const { protect } = require("../middleware/authMiddleware");
 

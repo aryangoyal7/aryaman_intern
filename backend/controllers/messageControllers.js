@@ -6,18 +6,12 @@ const Chat = require("../models/chatModel");
 //@description     Get all Messages
 //@route           GET /api/Message/:chatId
 //@access          Protected
-
 const allMessages = asyncHandler(async (req, res) => {
-
   try {
-    
-    //:chatId in routes //request params
     const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "name email")
+      .populate("sender", "name pic email")
       .populate("chat");
-
     res.json(messages);
-    
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
@@ -27,16 +21,14 @@ const allMessages = asyncHandler(async (req, res) => {
 //@description     Create New Message
 //@route           POST /api/Message/
 //@access          Protected
-
 const sendMessage = asyncHandler(async (req, res) => {
-
   const { content, chatId } = req.body;
 
   if (!content || !chatId) {
     console.log("Invalid data passed into request");
     return res.sendStatus(400);
   }
-  //schema 
+
   var newMessage = {
     sender: req.user._id,
     content: content,
@@ -46,20 +38,16 @@ const sendMessage = asyncHandler(async (req, res) => {
   try {
     var message = await Message.create(newMessage);
 
-    //populating the instance
-    message = await message.populate("sender", "name");
-    message = await message.populate("chat");
-
-    //populating with the user in that chat field of our message doc instance
+    message = await message.populate("sender", "name pic").execPopulate();
+    message = await message.populate("chat").execPopulate();
     message = await User.populate(message, {
       path: "chat.users",
-      select: "name email",
+      select: "name pic email",
     });
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
 
     res.json(message);
-
   } catch (error) {
     res.status(400);
     throw new Error(error.message);

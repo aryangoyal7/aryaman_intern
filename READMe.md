@@ -40,7 +40,7 @@ Socket.io enables features such as real-time message synchronization and dynamic
 Authentication and Security:
 
 User authentication is implemented using JSON Web Tokens (JWT), providing secure access to protected routes and ensuring user identity verification.
-Passwords are encrypted using Bcrypt.js, enhancing security by hashing user passwords before storing them in the database.
+
 User Management and Search:
 
 The system includes user management functionalities, allowing users to register, log in, and manage their profiles.
@@ -65,7 +65,7 @@ Group chat features include renaming chats, adding or removing users, and dynami
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB (Mongoose ODM)
 - **Authentication:** JSON Web Tokens (JWT)
-- **Password Encryption:** Bcrypt.js
+
 
 # Chat Application APIs
 
